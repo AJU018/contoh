@@ -4,24 +4,39 @@ on:
   push:
     branches:
       - main
+  pull_request:
 
 jobs:
   build:
     runs-on: ubuntu-latest
 
     steps:
+      # 1. Checkout repo
       - name: Checkout code
         uses: actions/checkout@v3
 
+      # 2. Setup Python
       - name: Set up Python
         uses: actions/setup-python@v4
         with:
           python-version: "3.9"
 
+      # 3. Install dependencies
       - name: Install dependencies
         run: |
           python -m pip install --upgrade pip
           pip install -r requirements.txt
 
-      - name: Run application
-        run: python app.py
+      # 4. Check Python syntax (safe for CI)
+      - name: Check Python syntax
+        run: python -m py_compile app.py
+
+      # 5. Run tests (optional, kalau ada)
+      - name: Run tests
+        run: |
+          pip install pytest
+          pytest
+
+      # 6. Smoke test app (safe run for 5 seconds)
+      - name: Smoke test application
+        run: timeout 5s python app.py
